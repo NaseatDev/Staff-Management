@@ -1,0 +1,1 @@
+﻿Scaffold-DbContext "Data Source=CMTR-62001765;initial catalog=StaffManagement;persist security info=True;user id=sa;password=Adm1n@12345;MultipleActiveResultSets=True;TrustServerCertificate=True" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context StaffDbContext -DataAnnotations -Force

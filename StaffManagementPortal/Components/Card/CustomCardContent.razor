@@ -1,0 +1,9 @@
+﻿<MudCard Class="mb-3" Outlined="true" Style="background: white">
+    <MudCardContent>
+        @CardContent
+    </MudCardContent>
+</MudCard>
+@code {
+    [Parameter]
+    public RenderFragment? CardContent { get; set; }
+}

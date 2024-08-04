@@ -1,0 +1,239 @@
+﻿@page "/"
+@using StaffManagement.Portal.Components.Table
+@using StaffManagement.Portal.Commons
+@using StaffManagement.Portal.Components.Dialogs
+@using StaffManagement.Portal.Excel.ExportExcel
+@using StaffManagement.Portal.Helpers
+@using StaffManagement.Portal.Models.Staff
+@using StaffManagement.Portal.Services.Staff
+@using OfficeOpenXml
+@inject IStaffService StaffService;
+@inject IDialogService DialogService;
+@inject ISnackbar Snackbar;
+@inject IJSRuntime JS
+<PageTitle> Staff List</PageTitle>
+
+<Spinner IsVisible="@_isVisible" />
+
+<CustomCardContent>
+    <CardContent>
+        <EditForm Model="@Filter" OnValidSubmit="HandleFilter">
+            <MudGrid>
+                <MudItem xs="6" md="3">
+                    <MudTextField Clearable="true" Label="Staff ID or Full Name" @bind-Value="@Filter!.SearchText" For="@(() => Filter!.SearchText)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="6" md="2">
+                    <MudSelect Margin="Margin.Dense" @bind-Value="@Filter!.Gender" T="int?" Label="Gender" Variant="Variant.Outlined" Clearable="true">
+                        <MudSelectItem T="int?" Value="1">Male</MudSelectItem>
+                        <MudSelectItem T="int?" Value="2">Female</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" md="6" Style="margin-top: 5px">
+                    <MudIconButton ButtonType="ButtonType.Submit" Icon="@Icons.Material.Filled.FilterList" Variant="Variant.Filled" Color="Color.Primary">Filter</MudIconButton>
+                    <MudButton @onclick="ExportToExcel" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary">
+                        Export to Excel
+                    </MudButton>
+                    <MudButton ButtonType="ButtonType.Submit" OnClick="HandleCreateNavigate" Variant="Variant.Filled" Color="Color.Primary">
+                        Create
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </CardContent>
+</CustomCardContent>
+
+<CustomCard>
+    <CardHeader>
+        <h3>Staff List</h3>
+    </CardHeader>
+    <CardContent>
+        <CustomTable Items="@StaffList!.Data">
+            <Header>
+                <MudTh>#</MudTh>
+                <MudTh>Staff Id</MudTh>
+                <MudTh>Full Name</MudTh>
+                <MudTh>Gender</MudTh>
+                <MudTh>Birth Date</MudTh>
+                <MudTd>
+
+                </MudTd>
+            </Header>
+
+            <Content>
+                @{
+                    int index = StaffList!.Data!.IndexOf(context) + 1;
+                }
+                <MudTd>@index</MudTd>
+                <MudTd>@context.StaffId</MudTd>
+                <MudTd>@context.FullName</MudTd>
+                <MudTd DataLabel="Gender">
+                    @if (context.Gender == 1)
+                    {
+                        <label>Male</label>
+                    }
+                    else
+                    {
+                        <label>Female</label>
+                    }
+                </MudTd>
+                <MudTd DataLabel="Birthday">
+                    @if (context.Birthday != null)
+                    {
+                        @DateTimeHelper.DisplayDate(context.Birthday)
+                    }
+                </MudTd>
+
+                <MudTd Style="text-align: right">
+                    <MudIconButton OnClick="() => HandleDelete(context.StaffId)" Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Color="Color.Error" Style="margin-right: 10px;" />
+                    <MudIconButton OnClick="() => HandleEditNavigate(context)" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled">Edit</MudIconButton>
+                </MudTd>
+            </Content>
+        </CustomTable>
+    </CardContent>
+    <CardAction>
+        <MudGrid>
+            <MudItem md="12" Style="text-align: center">
+                @if (StaffList!.TotalPages > 0)
+                {
+                    <MudPagination Variant="Variant.Filled" Count="@_totalPage" SelectedChanged="HandlePageChange" />
+                }
+            </MudItem>
+        </MudGrid>
+
+
+    </CardAction>
+</CustomCard>
+
+@code {
+    bool _isVisible;
+    int _totalPage;
+    int _currentPage = 1;
+    PaginatedResponseModel<StaffModel>? StaffList { get; set; } = new PaginatedResponseModel<StaffModel>();
+    private StaffFilterModel? Filter { get; set; } = new StaffFilterModel();
+    [Parameter]
+    public string StaffId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetStaff();
+    }
+    private async Task GetStaff()
+    {
+        _isVisible = true;
+        try
+        {
+            StaffList = await StaffService.GetAllAsync(_currentPage, Filter);
+            _totalPage = StaffList.TotalPages;
+            _isVisible = false;
+        }
+        catch
+        {
+            _isVisible = false;
+        }
+    }
+
+    private async Task HandleDelete(string staffId)
+    {
+        var parameters = new DialogParameters<ConfirmDialog>();
+        parameters.Add(x => x.ContentText, "Do you really want to delete these records? This process cannot be undone.");
+        parameters.Add(x => x.ButtonText, "Delete");
+        parameters.Add(x => x.Color, Color.Warning);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Large };
+
+        var dialog = await DialogService.ShowAsync<ConfirmDialog>("Delete", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+            try
+            {
+                var deleteResult = await StaffService.DeleteAsync(staffId);
+                Snackbar.Add(deleteResult.Messages, Severity.Success);
+                await GetStaff();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Warning);
+            }
+        }
+    }
+    private async void HandlePageChange(int currentPage)
+    {
+        _currentPage = currentPage;
+        await GetStaff();
+        StateHasChanged();
+    }
+
+    private async Task HandleFilter()
+    {
+        _currentPage = 1;
+        await GetStaff();
+    }
+    private async void ExportToExcel()
+    {
+        using var excelPackage = new ExcelPackage();
+        var exportPrams = new StaffExportParam
+            {
+                FileName = $"{DateTime.Now.ToString("yyyy_MM_dd_HH:mm:ss")}_ExportRetailer.xlsx",
+                FilePath = "",
+                ExcelPackage = excelPackage,
+                StaffModel = await StaffService.GetAllAsync(_currentPage, Filter)
+            };
+
+        await new ExcelExporter().ExportStaffAsync(exportPrams);
+
+        var excelByte = await excelPackage.GetAsByteArrayAsync();
+
+#pragma warning disable CS4014
+        JS.InvokeVoidAsync("saveAsFile", exportPrams.FileName, Convert.ToBase64String(excelByte));
+#pragma warning restore CS4014
+    }
+
+    private async Task HandleCreateNavigate()
+    {
+        var staffModel = new StaffModel
+            {
+                StaffId = StaffId,
+                Gender = 1,
+                CreatedDate = null
+            };
+        var parameters = new DialogParameters<StaffDialog> { { x => x.StaffModelForm, staffModel } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = DialogService.Show<StaffDialog>("Create New Staff", parameters, options);
+        var result = await dialog.Result;
+        if (!result!.Canceled)
+        {
+            if (result.Data!.Equals(true))
+            {
+                await GetStaff();
+            }
+        }
+        else
+        {
+            await GetStaff();
+        }
+    }
+
+    private async Task HandleEditNavigate(StaffModel staffModel)
+    {
+        var parameters = new DialogParameters<StaffDialog> { { x => x.StaffModelForm, staffModel } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = DialogService.Show<StaffDialog>("Update Staff", parameters, options);
+
+        var result = await dialog.Result;
+        if (!result!.Canceled)
+        {
+            if (result.Data!.Equals(true))
+            {
+                await GetStaff();
+            }
+        }
+        else
+        {
+            await GetStaff();
+        }
+    }
+
+}

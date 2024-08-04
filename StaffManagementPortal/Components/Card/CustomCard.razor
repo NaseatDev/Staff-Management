@@ -1,0 +1,20 @@
+﻿
+<MudCard Class="mb-3">
+    <MudCardHeader Style="border-bottom: 1px solid gray">
+        @CardHeader
+    </MudCardHeader>
+    <MudCardContent>
+        @CardContent
+    </MudCardContent>
+    <MudCardActions Style="display: flex; justify-content: right; align-items: end;">
+       @CardAction
+    </MudCardActions>
+</MudCard>
+@code {
+    [Parameter]
+    public RenderFragment? CardHeader { get; set; }
+    [Parameter]
+    public RenderFragment? CardContent { get; set; }
+    [Parameter]
+    public RenderFragment? CardAction { get; set; }
+}

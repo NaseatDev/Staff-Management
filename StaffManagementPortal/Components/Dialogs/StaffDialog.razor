@@ -1,0 +1,75 @@
+﻿@using StaffManagement.Portal.Models.Staff
+@using StaffManagement.Portal.Services.Staff
+@inject IStaffService StaffService;
+@inject ISnackbar Snackbar;
+
+<EditForm Model="@StaffModelForm" OnValidSubmit="HandleSubmitStaffForm">
+    <DataAnnotationsValidator />
+    <MudDialog>
+        <DialogContent>
+            <MudGrid>
+                <MudItem md="6">
+                    <MudTextField Label="Staff Id" @bind-Value="StaffModelForm.StaffId" For="@(() => StaffModelForm.StaffId)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mt-3" />
+                </MudItem>
+                <MudItem md="6">
+                    <MudTextField Label="Full Name" @bind-Value="StaffModelForm.FullName" For="@(() => StaffModelForm.FullName)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mt-3" />
+                </MudItem>
+                <MudItem xs="2" md="6" Class="mt-3">
+                    <MudSelect Margin="Margin.Dense" For="@(() => StaffModelForm.Gender)" @bind-Value="@StaffModelForm!.Gender" T="int" Label="Gender" Variant="Variant.Outlined" Clearable="true">
+                        <MudSelectItem T="int" Value="1">Male</MudSelectItem>
+                        <MudSelectItem T="int" Value="2">Female</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem md="6">
+                    <MudDatePicker Label="Birthday" Clearable="true" DateFormat="MM/dd/yyyy" @bind-Date="StaffModelForm.Birthday" For="@(() => StaffModelForm.Birthday)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mt-3" />
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel" Variant="Variant.Filled">Cancel</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter]
+    public StaffModel StaffModelForm { get; set; } = new StaffModel();
+
+
+    private async Task HandleSubmitStaffForm()
+    {
+        if (StaffModelForm.CreatedDate == null)
+        {
+            var result = await StaffService.CreateAsync(StaffModelForm);
+            if (result.Succeeded)
+            {
+                Snackbar.Add("Staff Created.", Severity.Success);
+                MudDialog!.Close(DialogResult.Ok(result.Succeeded));
+            }
+            else
+            {
+                Snackbar.Add(result.Messages, Severity.Error);
+            }
+        }
+        else
+        {
+            var result = await StaffService.UpdateAsync(StaffModelForm);
+            if (result.Succeeded)
+            {
+                Snackbar.Add("Staff Updated.", Severity.Success);
+                MudDialog!.Close(DialogResult.Ok(result.Succeeded));
+            }
+            else
+            {
+                Snackbar.Add(result.Messages, Severity.Error);
+            }
+        }
+       
+    }
+
+    void Cancel() => MudDialog!.Cancel();
+}
