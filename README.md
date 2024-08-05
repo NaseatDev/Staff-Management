@@ -34,4 +34,8 @@ This project use github action for ci/cd to deploy to azure app service
    ```bash
    git clone https://github.com/yourusername/staff-management-system.git
    cd staff-management-system
+## Api Document 
+
+You can access the api using swagger at the follow url:
+- https://staffmanagementapi.azurewebsites.net/swagger/index.html
 
