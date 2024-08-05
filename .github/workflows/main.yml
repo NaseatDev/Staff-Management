@@ -7,8 +7,8 @@ on:
     - main
 
 env:
-  AZURE_WEBAPP_NAME: current-time-service
-  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
+  AZURE_WEBAPP_NAME: StaffManagementApi
+  AZURE_WEBAPP_PACKAGE_PATH: "./wwwroot"
 
 jobs:
   publish:
@@ -21,15 +21,13 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
-          
-      - name: Restore
-        run: dotnet restore ./CurrentTimeService.sln
-        
+      - name: Install dependencies
+        run: dotnet restore ./StaffManagement/StaffManagement.sln
       - name: Build
-        run: dotnet build ./CurrentTimeService.sln --configuration Release --no-restore
+        run: dotnet build ./StaffManagement/StaffManagement.sln --configuration Release --no-restore
         
       - name: Publish
-        run: dotnet publish ./CurrentTimeService.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+        run: dotnet publish ./StaffManagement/StaffManagement.Api.csproj --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
         
       - name: Deployment
         uses: azure/webapps-deploy@v2
