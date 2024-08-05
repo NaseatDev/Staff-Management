@@ -21,6 +21,8 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
+      - name: Install dependencies
+        run: dotnet restore ./StaffManagement/StaffManagement.sln
       - name: Build
         run: dotnet build ./StaffManagement/StaffManagement.sln --configuration Release --no-restore
         
