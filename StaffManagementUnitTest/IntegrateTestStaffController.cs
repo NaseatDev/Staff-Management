@@ -40,7 +40,7 @@ namespace StaffManagement.UnitTest
             var staffDto = new StaffDto
             {
                 FullName = "Naseat Man",
-                Birthday = Convert.ToDateTime((2018, 12, 12)),
+                Birthday = new DateOnly(2018, 12, 12),
                 Gender = 1,
                 StaffId = "123456"
             };
@@ -80,7 +80,7 @@ namespace StaffManagement.UnitTest
         public async Task SaveAsync_ShouldReturnSuccess_WhenDataIsValid()
         {
             // Arrange
-            var staffDto = new StaffDto { StaffId = "123456", Gender = 1, CreatedDate = DateTime.Now, Birthday = new DateTime(1992, 12, 01) };
+            var staffDto = new StaffDto { StaffId = "123456", Gender = 1, CreatedDate = DateTime.Now, Birthday = new DateOnly(1992, 12, 01) };
             var staffEntity = new Staff { StaffId = "123456", Gender = 1, CreatedDate = DateTime.Now, Birthday = new DateOnly(1992, 12, 01) };
 
             _contextMock.Setup(c => c.Staff.FindAsync(It.IsAny<Func<Staff, bool>>())).ReturnsAsync((Staff)null!);
@@ -100,7 +100,7 @@ namespace StaffManagement.UnitTest
         public async Task SaveAsync_ShouldReturnFailure_WhenDuplicateStaffIdExists()
         {
             // Arrange
-            var staffDto = new StaffDto { StaffId = "123456", Gender = 1, CreatedDate = DateTime.Now, Birthday = new DateTime(1992, 12, 01) };
+            var staffDto = new StaffDto { StaffId = "123456", Gender = 1, CreatedDate = DateTime.Now, Birthday = new DateOnly(1992, 12, 01) };
             var existingStaff = new Staff { StaffId = "123456", Gender = 1, CreatedDate = DateTime.Now, Birthday = new DateOnly(1992, 12, 01) };
 
             _contextMock.Setup(c => c.Staff.FindAsync(staffDto.StaffId)).ReturnsAsync(existingStaff);
