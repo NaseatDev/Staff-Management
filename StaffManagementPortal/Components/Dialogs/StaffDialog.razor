@@ -21,7 +21,7 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem md="6">
-                    <MudDatePicker Label="Birthday" Clearable="true" DateFormat="MM/dd/yyyy" @bind-Date="StaffModelForm.Birthday" For="@(() => StaffModelForm.Birthday)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mt-3" />
+                    <MudDatePicker Label="Birthday" Clearable="true" DateFormat="MM/dd/yyyy" @bind-Date="StaffModelForm.BirthdayBinding" For="@(() => StaffModelForm.BirthdayBinding)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mt-3" />
                 </MudItem>
             </MudGrid>
         </DialogContent>
@@ -44,6 +44,7 @@
     {
         if (StaffModelForm.CreatedDate == null)
         {
+            StaffModelForm.Birthday = DateOnly.FromDateTime(StaffModelForm.BirthdayBinding!.Value);
             var result = await StaffService.CreateAsync(StaffModelForm);
             if (result.Succeeded)
             {
@@ -57,6 +58,7 @@
         }
         else
         {
+            StaffModelForm.Birthday = DateOnly.FromDateTime(StaffModelForm.BirthdayBinding!.Value);
             var result = await StaffService.UpdateAsync(StaffModelForm);
             if (result.Succeeded)
             {

@@ -78,10 +78,7 @@
                     }
                 </MudTd>
                 <MudTd DataLabel="Birthday">
-                    @if (context.Birthday != null)
-                    {
-                        @DateTimeHelper.DisplayDate(context.Birthday)
-                    }
+                    @context.Birthday
                 </MudTd>
 
                 <MudTd Style="text-align: right">
@@ -218,6 +215,7 @@
 
     private async Task HandleEditNavigate(StaffModel staffModel)
     {
+        staffModel.BirthdayBinding = staffModel.Birthday.ToDateTime(new TimeOnly(0, 0));
         var parameters = new DialogParameters<StaffDialog> { { x => x.StaffModelForm, staffModel } };
         var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = DialogService.Show<StaffDialog>("Update Staff", parameters, options);

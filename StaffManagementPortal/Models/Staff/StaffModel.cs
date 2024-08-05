@@ -11,8 +11,9 @@ namespace StaffManagement.Portal.Models.Staff
         [Required]
         [StringLength(100)]
         public string FullName { get; set; } = string.Empty;
+        public DateOnly Birthday { get; set; }
         [Required]
-        public DateTime? Birthday { get; set; }
+        public DateTime? BirthdayBinding { get; set; }
         [Required]
         [Range(1, 2)]
         public int Gender { get; set; }

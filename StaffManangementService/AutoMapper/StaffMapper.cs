@@ -9,10 +9,8 @@ namespace StaffManagement.Service.AutoMapper
         public StaffMapper()
         {
             AllowNullDestinationValues = null;
-            CreateMap<StaffDto, Staff>()
-                .ForMember(des => des.Birthday, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.Birthday)));
-            CreateMap<Staff, StaffDto>()
-                .ForMember(des => des.Birthday, opt => opt.MapFrom(src => src.Birthday.ToDateTime(new TimeOnly())));
+            CreateMap<StaffDto, Staff>();
+            CreateMap<Staff, StaffDto>();
             CreateMap<Staff, StaffReadDto>();
 
         }

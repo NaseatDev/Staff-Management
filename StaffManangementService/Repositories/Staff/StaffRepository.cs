@@ -42,7 +42,7 @@ namespace StaffManagement.Service.Repositories.Staff
                 }
 
                 var mappedQueryable = _mapper.ProjectTo<StaffDto>(queryable);
-                var paginatedResult = await mappedQueryable.ToPaginatedListAsync(
+                var paginatedResult = await mappedQueryable.OrderByDescending(o => o.CreatedDate).ToPaginatedListAsync(
                     paginationFilter.PageNumber,
                     paginationFilter.PageSize,
                     CancellationToken.None

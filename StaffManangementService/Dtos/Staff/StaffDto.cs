@@ -11,7 +11,7 @@ namespace StaffManagement.Service.Dtos.Staff
         [StringLength(100)]
         public string FullName { get; set; } = string.Empty;
         [Required]
-        public DateTime Birthday { get; set; }
+        public DateOnly Birthday { get; set; }
         [Required]
         [Range(1, 2)]
         public int Gender { get; set; }
