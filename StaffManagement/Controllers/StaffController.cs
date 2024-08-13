@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using StaffManagement.Service.Dtos;
 using StaffManagement.Service.Dtos.Staff;
 using StaffManagement.Service.Repositories.Staff;
 
 namespace StaffManagement.Api.Controllers
 {
+
+    //[Route("api/v{v:apiVersion}/staff")]
     public class StaffController : ApiControllerBase
     {
         private readonly IStaffRepository _staffRepository;
@@ -29,6 +33,7 @@ namespace StaffManagement.Api.Controllers
             }
         }
 
+        [MapToApiVersion(2)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] StaffDto staffDto)
         {
@@ -57,7 +62,7 @@ namespace StaffManagement.Api.Controllers
             }
         }
 
-
+        [EnableRateLimiting("Fixed")]
         [HttpGet("{staffId}")]
         public async Task<IActionResult> GetById(string staffId)
         {

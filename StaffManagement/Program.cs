@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using StaffManagement.Service.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,19 @@ builder.Services.AddCors(options =>
             policy.WithOrigins(corSettings!).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
         });
 });
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1);
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("X-Api-Version"));
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'V";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 builder.Services.AddServiceCollection(builder.Configuration);
 builder.Services.AddControllers();
@@ -28,6 +42,7 @@ if (app.Environment.IsDevelopment())
 {
 
 }
+app.UseRateLimiter();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("MyAllowSpecificOrigins");

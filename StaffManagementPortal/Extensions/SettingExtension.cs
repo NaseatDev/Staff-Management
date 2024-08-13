@@ -1,4 +1,4 @@
-﻿namespace CMIC.DMS.WebBlazor.Extensions
+﻿namespace StaffManagement.Portal.Extensions
 {
     public static class SettingExtension
     {
